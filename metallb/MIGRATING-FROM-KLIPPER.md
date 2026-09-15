@@ -17,16 +17,40 @@ own address and can use whatever port it wants.
 ## 1. Disable Klipper on all 3 nodes
 
 k3s was installed here without `--disable=servicelb`, so it has to be added
-to the existing systemd unit rather than the install command. On **each**
-of the 3 nodes, one at a time (this restarts k3s on that node — with the
-external MySQL datastore, the other two keep serving while it does):
+to the existing systemd unit rather than the install command. The k3s
+installer writes `ExecStart` as a backslash-continued block, one flag per
+line, e.g.:
+
+```
+ExecStart=/usr/local/bin/k3s \
+    server \
+        '--datastore-endpoint=mysql://k3s:...@tcp(192.168.2.204:3306)/k3s' \
+        '--tls-san=rancher.home.arpa' \
+        '--tls-san=192.168.2.204' \
+        '--write-kubeconfig-mode=644' \
+```
+
+A one-line `sed` substitution can't safely target a specific line inside
+that block, so edit it by hand instead. On **each** of the 3 nodes, one at
+a time (this restarts k3s on that node — with the external MySQL
+datastore, the other two keep serving while it does):
 
 ```bash
-sudo sed -i \
-  's/^\(ExecStart=.*k3s server.*\)$/\1 --disable=servicelb/' \
-  /etc/systemd/system/k3s.service
+sudo $EDITOR /etc/systemd/system/k3s.service
+```
 
-grep ExecStart /etc/systemd/system/k3s.service   # confirm --disable=servicelb was appended
+Add a new line right after `server \`, matching the existing indentation
+and quoting style:
+
+```
+        '--disable=servicelb' \
+```
+
+(order among the flag lines doesn't matter — putting it right after
+`server \` just keeps it easy to spot later.)
+
+```bash
+grep -A1 'server \\' /etc/systemd/system/k3s.service   # confirm --disable=servicelb is there
 
 sudo systemctl daemon-reload
 sudo systemctl restart k3s

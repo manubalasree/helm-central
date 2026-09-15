@@ -1,15 +1,21 @@
-# Overlay for running MiniStack on the Proxmox Ubuntu VM (Rancher/k3s) and
-# reaching it from another machine on the LAN via Ingress.
+# Overlay for running MiniStack on the 3-node k3s cluster (k8s-rancher-homelab)
+# and reaching it from another machine on the LAN via Ingress, the same way
+# rancher.home.arpa already works.
 #
 # Usage:
 #   helm install ministack . -f values-homelab.yaml
 #   helm upgrade ministack . -f values-homelab.yaml
 #
-# Before installing, replace MINI_PC_IP below with the VM's actual LAN IP
-# (find it on the VM with: hostname -I, or ip -4 addr show).
-# nip.io is a wildcard DNS service: any hostname containing an IP resolves
-# to that IP, so ministack.<IP>.nip.io needs no DNS or /etc/hosts changes
-# on the laptop at all, as long as both machines share the same LAN.
+# Before installing, add a Pi-hole Local DNS Record (same place
+# rancher.home.arpa is defined — Settings -> Local DNS Records on the
+# controller VM's Pi-hole admin, http://192.168.2.204:8080/admin):
+#   ministack.home.arpa -> 192.168.2.204
+# (192.168.2.204 is the controller VM itself, same target as
+# rancher.home.arpa — Pi-hole resolves the name to that host, then
+# nginx-lb's :80/:443 forwards to Traefik, which routes on the Host header
+# below. Not the MetalLB pool IP — Traefik is only reachable through
+# nginx-lb from off-cluster clients right now, per
+# ../metallb/MIGRATING-FROM-KLIPPER.md.)
 
 ingress:
   enabled: true
@@ -17,7 +23,7 @@ ingress:
   # RKE2 (whose default is ingress-nginx) or a standalone nginx controller.
   className: traefik
   hosts:
-    - host: ministack.MINI_PC_IP.nip.io
+    - host: ministack.home.arpa
       paths:
         - path: /
           pathType: Prefix
