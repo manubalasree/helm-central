@@ -1,0 +1,15 @@
+# L2 (ARP) mode: no BGP router needed, matches the kube-vip-style ARP
+# announcement already used elsewhere in this homelab for the control-plane
+# VIP. One speaker pod (on whichever of the 3 nodes currently holds the
+# lease) answers ARP for each assigned IP; if that node dies, another
+# speaker takes over and re-announces it — same failover model as Klipper,
+# but with a real dedicated IP per Service instead of "whichever node owns
+# it right now".
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: homelab-l2adv
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+    - homelab-pool

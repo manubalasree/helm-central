@@ -1,0 +1,34 @@
+# Overlay for running MiniStack on the Proxmox Ubuntu VM (Rancher/k3s) and
+# reaching it from another machine on the LAN via Ingress.
+#
+# Usage:
+#   helm install ministack . -f values-homelab.yaml
+#   helm upgrade ministack . -f values-homelab.yaml
+#
+# Before installing, replace MINI_PC_IP below with the VM's actual LAN IP
+# (find it on the VM with: hostname -I, or ip -4 addr show).
+# nip.io is a wildcard DNS service: any hostname containing an IP resolves
+# to that IP, so ministack.<IP>.nip.io needs no DNS or /etc/hosts changes
+# on the laptop at all, as long as both machines share the same LAN.
+
+ingress:
+  enabled: true
+  # k3s ships Traefik by default; switch to "nginx" if this cluster runs
+  # RKE2 (whose default is ingress-nginx) or a standalone nginx controller.
+  className: traefik
+  hosts:
+    - host: ministack.MINI_PC_IP.nip.io
+      paths:
+        - path: /
+          pathType: Prefix
+
+# A real VM, not a throwaway local pod — keep MiniStack's state across
+# pod restarts instead of losing it every time the container is rescheduled.
+persistence:
+  enabled: true
+
+# Merges with (doesn't replace) the base env map in values.yaml — tells
+# MiniStack to actually write its state to the volume mounted above.
+env:
+  PERSIST_STATE: "1"
+  STATE_DIR: /tmp/ministack-state

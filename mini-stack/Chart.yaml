@@ -1,0 +1,13 @@
+apiVersion: v2
+name: ministack
+description: A Helm chart for MiniStack, a local AWS emulator
+type: application
+version: 0.1.0
+appVersion: "1.5.12"
+home: https://ministack.org
+sources:
+  - https://github.com/ministackorg/ministack
+dependencies:
+  - name: redis
+    version: "0.1.0"
+    condition: redis.enabled

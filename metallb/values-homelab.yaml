@@ -1,0 +1,22 @@
+# Overlay for running MetalLB on the 3-node k3s cluster described in
+# k8s-rancher-homelab, replacing k3s's built-in Klipper servicelb.
+#
+# Usage:
+#   helm install metallb . -n metallb-system --create-namespace -f values-homelab.yaml
+#   helm upgrade metallb . -n metallb-system -f values-homelab.yaml
+#
+# Prerequisite: Klipper (servicelb) must be disabled on all 3 nodes first —
+# running both at once means two controllers fighting over the same
+# LoadBalancer Services. See MIGRATING-FROM-KLIPPER.md before installing.
+#
+# The defaults in values.yaml are already correct for this setup (L2/ARP
+# mode, speaker running as a DaemonSet on every node, no BGP/FRR needed —
+# frrk8s.enabled stays false), so this overlay is intentionally empty of
+# component overrides. Unlike ingress-style charts, MetalLB isn't
+# configured through Helm values at all: the actual IP pool and
+# advertisement mode are separate Kubernetes objects (IPAddressPool,
+# L2Advertisement) applied after install — see config/.
+#
+# crds.enabled defaults to true in values.yaml, so this install also
+# creates the IPAddressPool/L2Advertisement/BGPPeer/etc. CRDs that
+# config/*.yaml below depends on.

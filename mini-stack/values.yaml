@@ -1,0 +1,58 @@
+# Default values for the ministack chart.
+
+replicaCount: 1
+
+image:
+  repository: ministackorg/ministack
+  tag: "1.5.10"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 4566
+
+# MiniStack environment variables. Add/override any of the variables
+# documented at https://ministack.org/docs/configuration here — they are
+# passed straight through to the container as-is.
+env:
+  GATEWAY_PORT: "4566"
+  MINISTACK_REGION: "us-east-1"
+  LOG_LEVEL: "INFO"
+  SERVICES: "all"
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+probes:
+  liveness:
+    path: /_ministack/health
+  readiness:
+    path: /_ministack/ready
+
+persistence:
+  enabled: false
+  size: 5Gi
+  storageClassName: ""
+  mountPath: /tmp/ministack-state
+
+# Subchart: charts/redis. Set enabled: true to deploy a bundled Redis and
+# have MiniStack point its ElastiCache emulation at it automatically.
+# Any other key here (e.g. redis.image.tag, redis.port) overrides that
+# subchart's own values.yaml.
+redis:
+  enabled: false
+
+ingress:
+  enabled: false
+  className: ""
+  hosts:
+    - host: ministack.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []

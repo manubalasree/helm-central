@@ -1,0 +1,22 @@
+# The pool of LAN IPs MetalLB is allowed to hand out to LoadBalancer
+# Services. Carved out of DHCP on purpose — 192.168.2.220-250 — so the
+# router never hands one of these to a phone or laptop while a Service is
+# using it. Apply after `helm install metallb` (needs the IPAddressPool CRD
+# that install creates):
+#
+#   kubectl apply -f config/ipaddresspool.yaml -f config/l2advertisement.yaml
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: homelab-pool
+  namespace: metallb-system
+spec:
+  addresses:
+    - 192.168.2.220-192.168.2.250
+  # Only one pool exists here, so autoAssign: true is the simplest option —
+  # any LoadBalancer Service with no address preference gets the next free
+  # IP from this pool automatically. To pin a stable, memorable IP instead
+  # (e.g. so each of 3 MySQL instances keeps the same address across
+  # restarts), request it explicitly with the metallb.universe.tf/loadBalancerIPs
+  # annotation — see config/example-dedicated-ip-service.yaml.
+  autoAssign: true
