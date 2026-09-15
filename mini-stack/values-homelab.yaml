@@ -28,6 +28,20 @@ ingress:
         - path: /
           pathType: Prefix
 
+# Base values.yaml is sized for a throwaway pod (250m/512Mi request,
+# 1 CPU/1Gi limit) — bumped up here since this runs on real cluster
+# hardware, not a laptop.
+resources:
+  requests:
+    cpu: "1"
+    memory: 2Gi
+  limits:
+    # Half of a node (~4 CPU/node across the 3-node/12-CPU cluster), well
+    # above the 1 CPU request, leaving headroom for whatever else k3s
+    # schedules onto the same node.
+    cpu: "2"
+    memory: 4Gi
+
 # A real VM, not a throwaway local pod — keep MiniStack's state across
 # pod restarts instead of losing it every time the container is rescheduled.
 persistence:
