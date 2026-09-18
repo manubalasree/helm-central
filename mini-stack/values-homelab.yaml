@@ -47,8 +47,9 @@ resources:
 persistence:
   enabled: true
 
-# Merges with (doesn't replace) the base env map in values.yaml — tells
-# MiniStack to actually write its state to the volume mounted above.
+# Merges with (doesn't replace) the base env map in values.yaml.
+# Leave `SERVICES` unset to use MiniStack's default behavior (all services
+# enabled). Only set it if you want to restrict to a specific allowlist.
 env:
   PERSIST_STATE: "1"
   STATE_DIR: /tmp/ministack-state
