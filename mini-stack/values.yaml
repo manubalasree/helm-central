@@ -18,7 +18,6 @@ env:
   GATEWAY_PORT: "4566"
   MINISTACK_REGION: "us-east-1"
   LOG_LEVEL: "INFO"
-  SERVICES: "all"
 
 resources:
   requests:
