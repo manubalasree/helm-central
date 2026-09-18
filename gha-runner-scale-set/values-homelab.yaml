@@ -9,7 +9,7 @@
 # Do not commit the token or a rendered secret to Git.
 
 # Organization where this runner scale set is registered.
-githubConfigUrl: https://github.com/manubalasree
+githubConfigUrl: https://github.com/manubalasree-homelab
 
 # Use the pre-created secret instead of putting credentials in Helm values.
 githubConfigSecret: homelab-runner-auth
