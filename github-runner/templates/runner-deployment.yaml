@@ -1,0 +1,35 @@
+apiVersion: actions.github.com/v1alpha1
+kind: RunnerDeployment
+metadata:
+  name: {{ include "github-runner.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "github-runner.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.runner.replicaCount }}
+  template:
+    spec:
+      repository: {{ .Values.github.repository | quote }}
+      labels:
+        {{- toYaml .Values.github.runnerLabels | nindent 8 }}
+      image: {{ printf "%s:%s" .Values.runner.image.repository .Values.runner.image.tag | quote }}
+      imagePullPolicy: {{ .Values.runner.image.pullPolicy }}
+      {{- if .Values.secret.create }}
+      githubTokenFrom:
+        secretRef:
+          name: {{ include "github-runner.secretName" . }}
+      {{- end }}
+      resources:
+        {{- toYaml .Values.runner.resources | nindent 8 }}
+      {{- with .Values.runner.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.runner.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.runner.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
