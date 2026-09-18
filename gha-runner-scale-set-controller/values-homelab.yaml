@@ -1,0 +1,35 @@
+# Home-lab overlay for the modern ARC scale-set controller.
+#
+# Install this chart in the controller namespace, separately from the runner
+# scale set chart:
+#
+#   helm upgrade --install arc-controller . \
+#     --namespace arc-systems \
+#     -f values-homelab.yaml
+#
+# The runner scale set is installed separately in the arc-runners namespace.
+
+# One controller replica is sufficient for this home-lab cluster.
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# Enable Kubernetes health checks for reliable restarts and readiness reporting.
+healthProbeBindAddress: ":8081"
+
+# Keep controller logs concise and machine-readable when inspecting with kubectl.
+flags:
+  logLevel: "info"
+  logFormat: "json"
+  runnerMaxConcurrentReconciles: 2
+  updateStrategy: "eventual"
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

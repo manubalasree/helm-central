@@ -1,0 +1,28 @@
+# Home-lab overlay for the modern ARC runner scale set.
+#
+# Prerequisite: install the gha-runner-scale-set-controller chart first.
+# Create the GitHub authentication secret in the same namespace as this chart:
+#
+#   kubectl -n arc-runners create secret generic homelab-runner-auth \
+#     --from-literal=github_token='REPLACE_WITH_GITHUB_TOKEN'
+#
+# Do not commit the token or a rendered secret to Git.
+
+# Organization where this runner scale set is registered.
+githubConfigUrl: https://github.com/manubalasree
+
+# Use the pre-created secret instead of putting credentials in Helm values.
+githubConfigSecret: homelab-runner-auth
+
+# Stable name used by workflows in the runs-on field.
+runnerScaleSetName: homelab-runner
+
+# Keep one runner available for home-lab jobs.
+minRunners: 1
+maxRunners: 2
+
+# The runner image is managed by ARC's scale-set chart defaults.
+# Add nodeSelector/tolerations here later if runners need dedicated nodes.
+nodeSelector: {}
+tolerations: []
+affinity: {}
